@@ -9,7 +9,7 @@ import org.springframework.shell.standard.ShellOption;
 public class TestCommands {
 
 
-    @ShellMethod(value = "Add two integers together.",group = "My Commands")
+    @ShellMethod(value = "Add two integers together.",group = "Test Commands")
     public int add(@ShellOption(defaultValue="1",help = "这是第1个值")int a,
                    @ShellOption(help = "这是第2个值")int b) {
 
