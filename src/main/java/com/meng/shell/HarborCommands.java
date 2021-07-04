@@ -70,22 +70,44 @@ public class HarborCommands {
 	}
 
 
-	@ShellMethod(value = "query all projects in the harbor", group = harborCmdGroup)
-	public Object projects() {
+
+	@ShellMethod(value = "生成从源harbor到目录harbor镜像迁移所需要的全部脚本", group = harborCmdGroup)
+	public String genAllSh(@ShellOption(help = "目标 harbor 服务器IP地址和端口,eg: 192.168.1.2:8888")String ipAndPort) {
+
+
+		List<Map<String, Object>> projectList = getProjects();
+
+		for (Map<String, Object> item:projectList){
+			String name = item.get("name").toString();
+
+			genPullSh(name);
+			genTagSh(name,ipAndPort);
+			genPushSh(name);
+			genRmiSh(name);
+		}
+
+		return "success";
+	}
+
+
+
+	/**
+	 * 查询所有 harbor 中的 project
+	 * @return
+	 */
+	private List<Map<String, Object>> getProjects() {
+		List<Map<String, Object>> tempList = new ArrayList<>();
 
 		HttpRequest request = HttpUtil.createGet(baseUrl + "/projects?page=1&page_size=100");
 		request.basicAuth(username, pwd);
 
 		HttpResponse response = request.execute();
 
-		Object result = "";
-
 		if (response.isOk()) {
 			String json = JSONUtil.toJsonPrettyStr(response.body());
 
 			JSONArray arr = JSONUtil.parseArray(response.body());
 
-			List<Map<String, Object>> tempList = new ArrayList<>();
 			for (Object obj : arr) {
 				JSONObject item = (JSONObject) obj;
 
@@ -99,14 +121,20 @@ public class HarborCommands {
 				map.put("repoCount", repoCount);
 				tempList.add(map);
 			}
-
-			result = tempList;
-
-		} else {
-			result = response.toString();
+		}else {
+			System.out.println(response.body());
 		}
 
-		return result;
+		return tempList;
+	}
+
+
+
+
+	@ShellMethod(value = "query all projects in the harbor", group = harborCmdGroup)
+	public Object projects() {
+
+		return getProjects();
 	}
 
 
