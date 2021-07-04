@@ -120,7 +120,7 @@ public class HarborCommands {
 
 		if (response.isOk()){
 
-			File file = new File(name+"-pull.sh");
+			File file = getFile(name,name+"-pull.sh");
 			FileUtil.appendUtf8Lines(Lists.newArrayList(firstRowCmd),file);
 
 			JSONArray arr = JSONUtil.parseArray(response.body());
@@ -177,8 +177,8 @@ public class HarborCommands {
 	@ShellMethod(value = "根据 gen-pull-sh 命令生成的文件，重新打 tag ，指定到不同的 harbor 仓库", group = harborCmdGroup)
 	public Object genTagSh(String name,String ipAndPort) {
 
-		File file = new File(name+"-pull.sh");
-		File tagFile = new File(name+"-tag.sh");
+		File file = getFile(name,name+"-pull.sh");
+		File tagFile = getFile(name,name+"-tag.sh");
 
 		List<String> list = FileUtil.readUtf8Lines(file);
 
@@ -211,8 +211,8 @@ public class HarborCommands {
 
 	@ShellMethod(value = "根据 gen-tag-sh 命令生成的文件，修改为 push 命令 ，以 push 到不同的 harbor 仓库", group = harborCmdGroup)
 	public Object genPushSh(String name) {
-		File tagFile = new File(name+"-tag.sh");
-		File pushFile = new File(name+"-push.sh");
+		File tagFile = getFile(name,name+"-tag.sh");
+		File pushFile = getFile(name,name+"-push.sh");
 
 		List<String> list = FileUtil.readUtf8Lines(tagFile);
 
@@ -237,10 +237,10 @@ public class HarborCommands {
 	@ShellMethod(value = "生成删除本地镜像脚本", group = harborCmdGroup)
 	public Object genRmiSh(String name) {
 
-		File pullFile = new File(name+"-pull.sh");
-		File pushFile = new File(name+"-push.sh");
-		File pullRmiFile = new File(name+"-pull-rmi.sh");
-		File pushRmiFile = new File(name+"-push-rmi.sh");
+		File pullFile = getFile(name,name+"-pull.sh");
+		File pushFile = getFile(name,name+"-push.sh");
+		File pullRmiFile = getFile(name,name+"-pull-rmi.sh");
+		File pushRmiFile = getFile(name,name+"-push-rmi.sh");
 
 		List<String> list = FileUtil.readUtf8Lines(pullFile);
 
@@ -278,6 +278,10 @@ public class HarborCommands {
 
 
 
+	private File getFile(String parent,String fileName){
+		FileUtil.mkdir(parent);
+		return FileUtil.newFile(parent+"/"+fileName);
+	}
 
 
 
