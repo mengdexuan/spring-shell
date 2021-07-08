@@ -158,13 +158,10 @@ public class HarborCommands {
 				JSONObject item = (JSONObject) obj;
 				String repoName = item.getStr("name");
 
-				String pullCmd = "docker pull "+ipAndPort+"/"+repoName+":";
-
 				String artifact = StrUtil.removePrefix(repoName, name+"/");
 
 //				If it contains slash, encode it with URL encoding. e.g. a/b -> a%252Fb
 				artifact = StrUtil.replace(artifact,"/","%252F");
-
 
 				request = HttpUtil.createGet(baseUrl + "/projects/"+name+"/repositories/"+artifact+"/artifacts?page=1&page_size=10&with_tag=true&with_label=false&with_scan_overview=false&with_signature=false&with_immutable_status=false");
 				request.basicAuth(username, pwd);
@@ -183,6 +180,7 @@ public class HarborCommands {
 						}else {
 							JSONObject tag = (JSONObject)tags.get(0);
 							String tagName = tag.getStr("name");
+							String pullCmd = "docker pull "+ipAndPort+"/"+repoName+":";
 							pullCmd += tagName;
 							System.out.println(pullCmd);
 
