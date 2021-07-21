@@ -39,7 +39,7 @@ public class DbTransCommands {
 	private String fromUserAndPass;
 	private String toUserAndPass;
 
-	String connParam = "?characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&tinyInt1isBit=false&autoReconnect=true&failOverReadOnly=false";
+	private String connParam = "?characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&tinyInt1isBit=false&autoReconnect=true&failOverReadOnly=false";
 
 	@ShellMethod(value = "1.set from db info",group = "Db Trans Commands")
 	public Object fromInfo(@ShellOption(help = "ip和port，eg: localhost:3306")String ipAndPort,
@@ -49,19 +49,9 @@ public class DbTransCommands {
 		fromUrl = "jdbc:mysql://"+ipAndPort+"/"+fromDb+connParam;
 		this.fromUserAndPass = userAndPass;
 
-		DruidDataSource ds = new DruidDataSource();
-		ds.setUrl(fromUrl);
-		ds.setUsername(userAndPass.split(":")[0]);
-		ds.setPassword(userAndPass.split(":")[1]);
+		DruidDataSource ds = getDs(fromUrl,fromUserAndPass);
 
-		try {
-			DruidPooledConnection conn = ds.getConnection(3000);
-			conn.close();
-			ds.close();
-		} catch (SQLException e) {
-			System.err.println("获取数据库连接失败！");
-		}
-		System.out.println("数据库连接成功！");
+		checkDs(ds);
 
 		return fromUrl;
 	}
@@ -75,19 +65,9 @@ public class DbTransCommands {
 		toUrl = "jdbc:mysql://"+ipAndPort+"/"+toDb+connParam;
 		this.toUserAndPass = userAndPass;
 
-		DruidDataSource ds = new DruidDataSource();
-		ds.setUrl(toUrl);
-		ds.setUsername(userAndPass.split(":")[0]);
-		ds.setPassword(userAndPass.split(":")[1]);
+		DruidDataSource ds = getDs(toUrl,toUserAndPass);
 
-		try {
-			DruidPooledConnection conn = ds.getConnection(3000);
-			conn.close();
-			ds.close();
-		} catch (SQLException e) {
-			System.err.println("获取数据库连接失败！");
-		}
-		System.out.println("数据库连接成功！");
+		checkDs(ds);
 
 		return toUrl;
 	}
@@ -106,17 +86,8 @@ public class DbTransCommands {
 		String transInfo = fromUrl+"    -->   "+toUrl;
 		System.out.println(transInfo);
 
-
-		DruidDataSource fromDs = new DruidDataSource();
-		fromDs.setUrl(fromUrl);
-		fromDs.setUsername(fromUserAndPass.split(":")[0]);
-		fromDs.setPassword(fromUserAndPass.split(":")[1]);
-
-		DruidDataSource toDs = new DruidDataSource();
-		toDs.setUrl(toUrl);
-		toDs.setUsername(toUserAndPass.split(":")[0]);
-		toDs.setPassword(toUserAndPass.split(":")[1]);
-
+		DruidDataSource fromDs = getDs(fromUrl,fromUserAndPass);
+		DruidDataSource toDs = getDs(toUrl,toUserAndPass);
 		DruidPooledConnection fromConn = fromDs.getConnection();
 		DruidPooledConnection toConn = toDs.getConnection();
 
@@ -155,10 +126,10 @@ public class DbTransCommands {
 		}
 
 
-		fromConn.close();
-		toConn.close();
-		fromDs.close();
-		toDs.close();
+		JdbcUtils.close(fromConn);
+		JdbcUtils.close(toConn);
+		JdbcUtils.close(fromDs);
+		JdbcUtils.close(toDs);
 
 		return "complete!";
 	}
@@ -211,6 +182,29 @@ public class DbTransCommands {
 		return sqlData;
 	}
 
+
+	private DruidDataSource getDs(String url,String userAndPass){
+		DruidDataSource ds = new DruidDataSource();
+		ds.setUrl(url);
+		ds.setUsername(userAndPass.split(":")[0]);
+		ds.setPassword(userAndPass.split(":")[1]);
+		return ds;
+	}
+
+	/**
+	 * 检测数据库连接是否可用
+	 * @param ds
+	 */
+	private void checkDs(DruidDataSource ds){
+		try {
+			DruidPooledConnection conn = ds.getConnection(3000);
+			conn.close();
+			ds.close();
+		} catch (SQLException e) {
+			System.err.println("获取数据库连接失败！");
+		}
+		System.out.println("数据库连接成功！");
+	}
 
 
 }
