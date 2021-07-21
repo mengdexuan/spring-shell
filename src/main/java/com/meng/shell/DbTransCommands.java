@@ -59,7 +59,7 @@ public class DbTransCommands {
 			conn.close();
 			ds.close();
 		} catch (SQLException e) {
-			System.out.println("获取数据库连接失败！");
+			System.err.println("获取数据库连接失败！");
 		}
 		System.out.println("数据库连接成功！");
 
@@ -85,7 +85,7 @@ public class DbTransCommands {
 			conn.close();
 			ds.close();
 		} catch (SQLException e) {
-			System.out.println("获取数据库连接失败！");
+			System.err.println("获取数据库连接失败！");
 		}
 		System.out.println("数据库连接成功！");
 
@@ -138,8 +138,8 @@ public class DbTransCommands {
 							JdbcUtils.execute(toConn,sql);
 							System.out.println(sql);
 						}catch (Exception e){
-							System.out.println("error while exec insert sql:"+sql);
-							System.out.println(e.getMessage());
+							System.err.println("error while exec insert sql:"+sql);
+							System.err.println(e.getMessage());
 						}
 					}
 				}
@@ -149,8 +149,8 @@ public class DbTransCommands {
 				ThreadUtil.safeSleep(1000);
 			}catch (Exception e){
 				String msg = "error while trans "+table+"!";
-				System.out.println(msg);
-				System.out.println(e.getMessage());
+				System.err.println(msg);
+				System.err.println(e.getMessage());
 			}
 		}
 
