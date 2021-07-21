@@ -1,8 +1,12 @@
 package com.meng.shell;
 
+import cn.hutool.core.util.ClassUtil;
+import cn.hutool.core.util.StrUtil;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
+
+import java.util.Set;
 
 
 @ShellComponent
@@ -21,6 +25,13 @@ public class TestCommands {
     }
 
 
+    public static void main(String[] args) {
+
+        Set<Class<?>> list = ClassUtil.scanPackageByAnnotation("com", ShellComponent.class);
+
+
+        System.out.println(list.size());
+    }
 
 
 
