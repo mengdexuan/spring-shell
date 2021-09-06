@@ -39,9 +39,9 @@ public class JasyptCommands {
 
 		String result = stringEncryptor.encrypt(val);
 
-		System.out.println("使用密钥："+pwd+" 加密字符串："+val+" 结果是："+result);
+		System.out.println("使用密钥："+pwd+" 加密字符串："+val+" 结果是："+result+"\n");
 
-		return result;
+		return "ENC("+result+")\n";
 	}
 
 
@@ -57,7 +57,7 @@ public class JasyptCommands {
 
 		String result = stringEncryptor.decrypt(val);
 
-		System.out.println("使用密钥："+pwd+" 解密字符串："+val+" 结果是："+result);
+		System.out.println("使用密钥："+pwd+" 解密字符串："+val+" 结果是："+result+"\n");
 
 		return result;
 	}
