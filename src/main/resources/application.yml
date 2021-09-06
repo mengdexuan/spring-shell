@@ -2,3 +2,10 @@ spring:
   output:
     ansi:
       enabled: ALWAYS
+
+
+#加密密钥
+jasypt:
+  encryptor:
+    password: EbfYkitulv73I2p0mXI50JMXoaxZTKJ0
+
