@@ -11,9 +11,6 @@ import org.springframework.shell.jline.PromptProvider;
  * {@code Application} represents the entry point for the Spring
  * boot application example.
  * <p/>
- *
- * @author Indra Basak
- * @since 10/16/17
  */
 @SpringBootApplication
 public class Application {
