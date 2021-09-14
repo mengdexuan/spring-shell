@@ -43,6 +43,7 @@ public class TestCommands {
         DES des = SecureUtil.des(accessKey.getBytes());
         String desStr = des.encryptBase64(secretKey);
 
+
         System.out.println(desStr);
     }
 
