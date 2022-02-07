@@ -111,7 +111,11 @@ public class HarborCommands {
 			for (Object obj : arr) {
 				JSONObject item = (JSONObject) obj;
 
-				int repoCount = item.getInt("repo_count");
+				int repoCount = 0;
+				try {
+					repoCount = item.getInt("repo_count");
+				} catch (Exception e) {
+				}
 				String projectId = item.getStr("project_id");
 				String name = item.getStr("name");
 
