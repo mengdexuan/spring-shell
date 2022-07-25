@@ -1,8 +1,10 @@
 package com.meng.shell;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.pool.DruidPooledConnection;
 import com.alibaba.druid.util.JdbcUtils;
@@ -33,6 +35,7 @@ public class DbCommands {
 
 	private String connParam = "?characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&tinyInt1isBit=false&autoReconnect=true&failOverReadOnly=false";
 
+	//set-db-info --ip-and-port 10.10.1.69:3306 --user-and-pass root:V9ftr3SNqwGoQt0eli --db wyt_csf
 	@ShellMethod(value = "1.set db info",group = "Db Commands")
 	public Object setDbInfo(@ShellOption(help = "ip和port，eg: localhost:3306")String ipAndPort,
 						   @ShellOption(help = "user和pass，eg: root:123456")String userAndPass,
@@ -66,6 +69,77 @@ public class DbCommands {
 	}
 
 
+
+	@ShellMethod(value = "3.dealTable",group = "Db Commands")
+	public Object dealTable(@ShellOption(help = "数据格式:表名,字段名... ：signature_parameter,signature_path") String table) throws Exception{
+
+		DruidDataSource ds = getDs(url,userAndPass);
+		DruidPooledConnection conn = ds.getConnection();
+
+		List<String> strList = HelpMe.easySplit(table);
+
+		String tableName = strList.get(0);
+
+		String sql = "select id,";
+
+		for (int i=0;i<strList.size();i++){
+			if (i==0){
+			}else {
+				sql += strList.get(i);
+				sql += ",";
+			}
+		}
+
+		sql = StrUtil.removeSuffix(sql,",");
+		sql += " from " + strList.get(0);
+
+		System.out.println("执行的sql: "+sql);
+
+		List<Map<String, Object>> mapList = null;
+		try {
+			mapList = JdbcUtils.executeQuery(conn, sql, Lists.newArrayList());
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		int size = strList.size();
+
+		for (Map<String, Object> item:mapList){
+			for (int i=1;i<strList.size();i++){
+				String ossUrl = MapUtil.getStr(item,strList.get(i));
+				if (StrUtil.isNotEmpty(ossUrl)&&(ossUrl.startsWith("http://") || ossUrl.startsWith("https://"))){
+					dealColumn(tableName,strList.get(i),MapUtil.getLong(item,"id"),ossUrl,conn);
+				}
+			}
+		}
+
+//		System.out.println(JSONUtil.toJsonPrettyStr(mapList));
+		System.out.println("数据条数："+mapList.size());
+
+		JdbcUtils.close(conn);
+		JdbcUtils.close(ds);
+
+		return "complete!";
+	}
+
+
+	private void dealColumn(String tableName,String columnName,Long idVal,String ossUrl,DruidPooledConnection conn){
+		System.out.println("原字段 ossUrl 值：" +columnName+" : "+ossUrl);
+		String columnVal = ossUrl;
+
+
+
+
+
+		String sql = "update "+tableName + " set "+columnName + " = '"+columnVal+"' where id = " + idVal;
+		System.out.println("执行更新 sql : "+sql);
+
+		try {
+			JdbcUtils.execute(conn,sql);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 
 
 
