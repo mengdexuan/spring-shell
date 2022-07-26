@@ -3,12 +3,14 @@ package com.meng.shell;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HttpUtil;
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.pool.DruidPooledConnection;
 import com.alibaba.druid.util.JdbcUtils;
-import com.alibaba.druid.util.MySqlUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.meng.util.HelpMe;
@@ -16,6 +18,7 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -125,20 +128,49 @@ public class DbCommands {
 
 	private void dealColumn(String tableName,String columnName,Long idVal,String ossUrl,DruidPooledConnection conn){
 		System.out.println("原字段 ossUrl 值：" +columnName+" : "+ossUrl);
+
+		String baseDir = "C:\\Users\\18514\\Desktop\\test4";
+
+		String extName = FileUtil.extName(ossUrl);
+
+		String finalName = baseDir + "\\" + IdUtil.fastSimpleUUID()+"."+extName;
+
+		HttpUtil.downloadFile(ossUrl,finalName);
+
+		String url = "http://test.wyt.ticket.iciyun.net/user/outter/fore/upload/common.do";
+
+		File file = new File(finalName);
+
+		Map<String,Object> param = Maps.newHashMap();
+		param.put("file",file);
+
+		String body = HttpUtil.post(url, param);
+
+		JSONObject json = JSONUtil.parseObj(body);
+
 		String columnVal = ossUrl;
 
-
-
-
+		String success = json.getStr("success");
+		if ("true".equals(success)){
+			String obj = json.getStr("obj");
+			if (obj.startsWith("http") || obj.startsWith("https")){
+				columnVal = obj;
+			}
+		}
 
 		String sql = "update "+tableName + " set "+columnName + " = '"+columnVal+"' where id = " + idVal;
-		System.out.println("执行更新 sql : "+sql);
 
 		try {
 			JdbcUtils.execute(conn,sql);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+
+		System.out.println("执行更新 sql : "+sql);
+
+		FileUtil.del(file);
+
+		ThreadUtil.safeSleep(500);
 	}
 
 
