@@ -38,7 +38,17 @@ public class DbCommands {
 
 	private String connParam = "?characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&tinyInt1isBit=false&autoReconnect=true&failOverReadOnly=false";
 
-	//set-db-info --ip-and-port 10.10.1.69:3306 --user-and-pass root:V9ftr3SNqwGoQt0eli --db wyt_csf
+	//临时文件存储目录
+	String baseDir = "C:\\Users\\18514\\Desktop\\test4";
+
+	/**
+	 * 设置数据库连接信息，参数示例：
+	 * 	set-db-info --ip-and-port 10.10.1.69:3306 --user-and-pass root:V9ftr3SNqwGoQt0eli --db wyt_csf
+	 * @param ipAndPort
+	 * @param userAndPass
+	 * @param db
+	 * @return
+	 */
 	@ShellMethod(value = "1.set db info",group = "Db Commands")
 	public Object setDbInfo(@ShellOption(help = "ip和port，eg: localhost:3306")String ipAndPort,
 						   @ShellOption(help = "user和pass，eg: root:123456")String userAndPass,
@@ -72,7 +82,23 @@ public class DbCommands {
 	}
 
 
-
+	/**
+	 * 处理表中字段，参数示例：
+	 *
+	 * deal-table tang_tenant_config,img_login_logo,img_login_background,browser_icon,voucher_proof_img,voucher_logo,index_background,login_background
+	 * deal-table sys_account_record,offline_payment_url
+	 * deal-table signature_parameter,signature_path
+	 * deal-table per_front_user,idcard_front_url,idcard_reverse_url
+	 * deal-table attachment,file_url
+	 * deal-table axq_contract,file_id
+	 * deal-table axq_seal,localhost_path
+	 * deal-table pay_detail,pay_param
+	 * deal-table enterprise_expand,business_license_url,idcard_front_side_url,idcard_reverse_side_url,author_certificate
+	 *
+	 * @param table
+	 * @return
+	 * @throws Exception
+	 */
 	@ShellMethod(value = "3.dealTable",group = "Db Commands")
 	public Object dealTable(@ShellOption(help = "数据格式:表名,字段名... ：signature_parameter,signature_path") String table) throws Exception{
 
@@ -126,10 +152,56 @@ public class DbCommands {
 	}
 
 
+	/**
+	 * 处理 json 中的 url ，参数示例：
+	 *
+	 * deal-table-json --table enterprise_expand --column person --json-key credentFrontUrl
+	 * deal-table-json --table enterprise_expand --column person --json-key credentReverseUrl
+	 *
+	 * @param table
+	 * @param column
+	 * @param jsonKey
+	 * @return
+	 * @throws Exception
+	 */
+	@ShellMethod(value = "4.dealTableJson",group = "Db Commands")
+	public Object dealTableJson(@ShellOption(help = "表名：enterprise_expand") String table,
+								@ShellOption(help = "字段名：enterprise_info") String column,
+								@ShellOption(help = "json key：businessLicenseUrl") String jsonKey) throws Exception{
+
+		DruidDataSource ds = getDs(url,userAndPass);
+		DruidPooledConnection conn = ds.getConnection();
+
+		String sql = "select id,"+column+" from "+table+" where "+column +" is not null";
+
+		System.out.println("执行的sql: "+sql);
+
+		List<Map<String, Object>> mapList = null;
+		try {
+			mapList = JdbcUtils.executeQuery(conn, sql, Lists.newArrayList());
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		for (Map<String, Object> item:mapList){
+			dealColumnJson(item,table,column,jsonKey,conn);
+		}
+
+		System.out.println("数据条数："+mapList.size());
+
+		JdbcUtils.close(conn);
+		JdbcUtils.close(ds);
+
+		return "complete!";
+	}
+
+
+
+
+
 	private void dealColumn(String tableName,String columnName,Long idVal,String ossUrl,DruidPooledConnection conn){
 		System.out.println("原字段 ossUrl 值：" +columnName+" : "+ossUrl);
 
-		String baseDir = "C:\\Users\\18514\\Desktop\\test4";
 
 		String extName = FileUtil.extName(ossUrl);
 
@@ -137,7 +209,11 @@ public class DbCommands {
 
 		HttpUtil.downloadFile(ossUrl,finalName);
 
-		String url = "http://test.wyt.ticket.iciyun.net/user/outter/fore/upload/common.do";
+//		万易通测试环境地址
+//		String url = "http://test.wyt.ticket.iciyun.net/user/outter/fore/upload/common.do";
+
+//		万易通正式环境地址
+		String url = "https://wanyitong.51tangpiao.com/user/outter/fore/upload/common.do";
 
 		File file = new File(finalName);
 
@@ -170,8 +246,74 @@ public class DbCommands {
 
 		FileUtil.del(file);
 
-		ThreadUtil.safeSleep(500);
+		ThreadUtil.safeSleep(300);
 	}
+
+
+	private void dealColumnJson(Map<String,Object> map,String table,String column,String jsonKey,DruidPooledConnection conn){
+		Long id = MapUtil.getLong(map,"id");
+		String columnVal = MapUtil.getStr(map,column);
+
+		System.out.println("原字段值：" +columnVal);
+
+		JSONObject json2 = JSONUtil.parseObj(columnVal);
+		String jsonVal = json2.getStr(jsonKey);
+
+		if (StrUtil.isNotEmpty(jsonVal)&&(jsonVal.startsWith("http://") || jsonVal.startsWith("https://"))){
+		}else {
+			return;
+		}
+
+		String extName = FileUtil.extName(jsonVal);
+
+		String finalName = baseDir + "\\" + IdUtil.fastSimpleUUID()+"."+extName;
+
+		HttpUtil.downloadFile(jsonVal,finalName);
+
+//		万易通测试环境地址
+//		String url = "http://test.wyt.ticket.iciyun.net/user/outter/fore/upload/common.do";
+
+//		万易通正式环境地址
+		String url = "https://wanyitong.51tangpiao.com/user/outter/fore/upload/common.do";
+
+		File file = new File(finalName);
+
+		Map<String,Object> param = Maps.newHashMap();
+		param.put("file",file);
+
+		String body = HttpUtil.post(url, param);
+
+		JSONObject json = JSONUtil.parseObj(body);
+
+		String newUrl = jsonVal;
+
+		String success = json.getStr("success");
+		if ("true".equals(success)){
+			String obj = json.getStr("obj");
+			if (obj.startsWith("http") || obj.startsWith("https")){
+				newUrl = obj;
+			}
+		}
+
+		json2.putOpt(jsonKey,newUrl);
+
+		String newColumnVal = JSONUtil.toJsonStr(json2);
+
+		String sql = "update "+table + " set "+column + " = '"+newColumnVal+"' where id = " + id;
+
+		try {
+			JdbcUtils.execute(conn,sql);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		System.out.println("执行更新 sql : "+sql);
+
+		FileUtil.del(file);
+
+		ThreadUtil.safeSleep(300);
+	}
+
 
 
 
