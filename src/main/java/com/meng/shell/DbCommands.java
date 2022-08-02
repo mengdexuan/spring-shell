@@ -41,6 +41,13 @@ public class DbCommands {
 	//临时文件存储目录
 	String baseDir = "C:\\Users\\18514\\Desktop\\test4";
 
+//	万易通测试环境地址
+	String uploadUrl = "http://test.wyt.ticket.iciyun.net/user/outter/fore/upload/common.do";
+
+	//		万易通正式环境地址
+//	String uploadUrl = "https://wanyitong.51tangpiao.com/user/outter/fore/upload/common.do";
+
+
 	/**
 	 * 设置数据库连接信息，参数示例：
 	 * 	set-db-info --ip-and-port 10.10.1.69:3306 --user-and-pass root:V9ftr3SNqwGoQt0eli --db wyt_csf
@@ -209,18 +216,12 @@ public class DbCommands {
 
 		HttpUtil.downloadFile(ossUrl,finalName);
 
-//		万易通测试环境地址
-//		String url = "http://test.wyt.ticket.iciyun.net/user/outter/fore/upload/common.do";
-
-//		万易通正式环境地址
-		String url = "https://wanyitong.51tangpiao.com/user/outter/fore/upload/common.do";
-
 		File file = new File(finalName);
 
 		Map<String,Object> param = Maps.newHashMap();
 		param.put("file",file);
 
-		String body = HttpUtil.post(url, param);
+		String body = HttpUtil.post(uploadUrl, param);
 
 		JSONObject json = JSONUtil.parseObj(body);
 
@@ -270,18 +271,13 @@ public class DbCommands {
 
 		HttpUtil.downloadFile(jsonVal,finalName);
 
-//		万易通测试环境地址
-//		String url = "http://test.wyt.ticket.iciyun.net/user/outter/fore/upload/common.do";
-
-//		万易通正式环境地址
-		String url = "https://wanyitong.51tangpiao.com/user/outter/fore/upload/common.do";
 
 		File file = new File(finalName);
 
 		Map<String,Object> param = Maps.newHashMap();
 		param.put("file",file);
 
-		String body = HttpUtil.post(url, param);
+		String body = HttpUtil.post(uploadUrl, param);
 
 		JSONObject json = JSONUtil.parseObj(body);
 
