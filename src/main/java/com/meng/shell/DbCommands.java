@@ -42,7 +42,7 @@ public class DbCommands {
 	String baseDir = "C:\\Users\\18514\\Desktop\\test4";
 
 //	万易通测试环境地址
-	String uploadUrl = "http://test.wyt.ticket.iciyun.net/user/outter/fore/upload/common.do";
+	String uploadUrl = "http://test.wyt2.ticket.iciyun.net/user/outter/fore/upload/common.do";
 
 	//		万易通正式环境地址
 //	String uploadUrl = "https://wanyitong.51tangpiao.com/user/outter/fore/upload/common.do";
@@ -50,7 +50,7 @@ public class DbCommands {
 
 	/**
 	 * 设置数据库连接信息，参数示例：
-	 * 	set-db-info --ip-and-port 10.10.1.69:3306 --user-and-pass root:V9ftr3SNqwGoQt0eli --db wyt_csf
+	 * 	set-db-info --ip-and-port 10.10.1.69:3306 --user-and-pass root:V9ftr3SNqwGoQt0eli --db wyt_two_csf
 	 * @param ipAndPort
 	 * @param userAndPass
 	 * @param db
@@ -247,7 +247,7 @@ public class DbCommands {
 
 		FileUtil.del(file);
 
-		ThreadUtil.safeSleep(300);
+		ThreadUtil.safeSleep(100);
 	}
 
 
