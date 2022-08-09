@@ -27,10 +27,15 @@ import java.util.Map;
 public class MongodbCommands {
 
     //临时文件存储目录
-    String baseDir = "/Users/admin/workSpace/test";
+//    String baseDir = "/Users/admin/workSpace/test";
+    //临时文件存储目录
+    String baseDir = "C:\\Users\\18514\\Desktop\\test4";
+
 
     //	万易通测试环境地址
-    String uploadUrl = "http://test.wyt2.ticket.iciyun.net/user/outter/fore/upload/common.do";
+//    String uploadUrl = "http://test.wyt2.ticket.iciyun.net/user/outter/fore/upload/common.do";
+    //		万易通正式环境地址
+	String uploadUrl = "https://wanyitong.51tangpiao.com/user/outter/fore/upload/common.do";
 
     public MongoClient client = null ;
 
