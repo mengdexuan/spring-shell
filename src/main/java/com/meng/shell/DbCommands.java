@@ -357,6 +357,21 @@ public class DbCommands {
 		return sqlData;
 	}
 
+	public static void main(String[] args) {
+		DruidDataSource ds = new DruidDataSource();
+		String url = "jdbc:oracle:thin:@10.10.1.111:1521:orcl";
+
+		ds.setUrl(url);
+		ds.setUsername("system");
+		ds.setPassword("manager3");
+
+		try {
+			DruidPooledConnection conn = ds.getConnection(5000);
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 
 	private DruidDataSource getDs(String url,String userAndPass){
 		DruidDataSource ds = new DruidDataSource();
