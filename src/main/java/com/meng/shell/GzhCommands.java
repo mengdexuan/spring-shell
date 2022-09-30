@@ -1,6 +1,8 @@
 package com.meng.shell;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ZipUtil;
@@ -67,7 +69,8 @@ public class GzhCommands {
 
         List<File> fileList = FileUtil.loopFiles(baseDir);
 
-        List<String> row0 = CollUtil.newArrayList("冠字号码", "交易时间", "机构号", "设备编号", "币值");
+//        List<String> row0 = CollUtil.newArrayList("冠字号码", "交易时间", "机构号", "设备编号", "币值");
+        List<String> row0 = CollUtil.newArrayList("点钞时间", "机具编码", "券别", "冠字号码", "币种","版本","钞票状态");
         List<List<String>> rows = CollUtil.newArrayList();
         rows.add(row0);
 
@@ -107,9 +110,28 @@ public class GzhCommands {
             String fileName = "";
             for (FsnRow item : list) {
                 fileName = item.getDateStr();
+
+                String time = DateUtil.format(DateUtil.parse(item.getDateTime()), DatePattern.PURE_DATETIME_PATTERN);
                 String machineSno = item.getMachineSno();
+                int valuta = item.getValuta();
+                String sno = item.getSno();
+                String moneyFlag = item.getMoneyFlag();
+
+                //	Ver年版或版本号标志；人民币用作年版标志，值填0,1,2，分别代表1990,1999,2005三个年版，可根据实际情况扩充；其余币种填9999（表示不考虑年版）；
+                int ver = item.getVer();
+                String verStr = "9999";
+                if (ver==0){
+                    verStr = "1990";
+                }else if (ver==1){
+                    verStr = "1999";
+                }else if (ver==2){
+                    verStr = "2005";
+                }
+
+                int tfFlag = item.getTfFlag();
+
                 String arr[] = machineSno.split("/");
-                List<String> row = CollUtil.newArrayList(item.getSno(), item.getDateTime(), orgNo, arr[2], item.getValuta() + "");
+                List<String> row = CollUtil.newArrayList(time,machineSno,valuta+"",sno,moneyFlag,verStr,tfFlag+"");
                 rows.add(row);
             }
             return fileName;
@@ -126,7 +148,7 @@ public class GzhCommands {
 
         //通过工具类创建writer
 //        ExcelWriter writer = ExcelUtil.getWriter("C:\\Users\\18514\\Desktop\\test4\\file\\" + fileName + ".xls");
-        ExcelWriter writer = ExcelUtil.getWriter(excelDir+File.separator + fileName + ".xls");
+        ExcelWriter writer = ExcelUtil.getWriter(excelDir+File.separator + fileName + ".csv");
 //合并单元格后的标题行，使用默认标题样式
         writer.merge(row0.size() - 1, "数据");
 //一次性写出内容，强制输出标题
@@ -134,7 +156,7 @@ public class GzhCommands {
 //关闭writer，释放内存
         writer.close();
 
-        System.out.println("生成 excel 文件：" + fileName + ".xls");
+        System.out.println("生成 excel 文件：" + fileName + ".csv");
     }
 
 

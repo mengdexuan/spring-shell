@@ -6,10 +6,16 @@ public class FsnRow {
 	private String dateStr;  //验钞启动日期
 	private String timeStr;  //验钞启动时间
 	private String dateTime;  //验钞启动日期+时间
+
 	private int tfFlag;  //真假币标志
+//	tfFlag真假币标志，0为假币或可疑币，1为真币，2为残币(清分机适用)，3为旧币(清分机适用)；
+
 	private String errorCode;  //表示最多3组假币特征码
 	private String moneyFlag;  //币种标志
+
+//	Ver年版或版本号标志；人民币用作年版标志，值填0,1,2，分别代表1990,1999,2005三个年版，可根据实际情况扩充；其余币种填9999（表示不考虑年版）；
 	private int  ver;  //年版或版本号标志
+
 	private int valuta;  //币值
 	private int charNum;  //冠字号码字符数；
 	private String sno;  //存放识别的冠字号码
